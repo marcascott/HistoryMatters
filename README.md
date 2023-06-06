@@ -18,5 +18,6 @@ BioFam_SHA.R - Sequence History Analysis (SHA) approach [mostly taken from the T
 BioFam_HMM.R - Hidden Markov Models (HMM) as described in the paper
 BioFam_FMM.R - Finite Mixture Models (FMM) - or latent class models - for 2-channel processes, 
                one a Discrete Time Event History Analysis (DT-EHA) as described in the paper
+FMMRuns.Rdata- Saved runs for the FMM, which can take a longer time to run.
 
 Questions? Contact marc.scott@nyu.edu (corresponding author)
