@@ -25,7 +25,9 @@ event <- dss[, 1]=="LMC"|dss[, 2]=="LMC"
 ## The seqsha function will convert the data to person period.
 ## At each time point, the previous trajectory until that point is stored
 sha <- seqsha(bf.seq, time, event, covar=biofam[, c("sex", "birthyr")])
-summary(sha)
+dim(sha)
+class(sha)
+names(sha)
 
 ## Now we build a sequence object for the previous trajectory
 previousTraj <- seqdef(sha[, 4:19])
@@ -49,3 +51,6 @@ summary(glm(event~time+pclustname+sex, data=sha, family=binomial))
 ## In our paper, we discretized time, so the model would look more like this:
 
 summary(glm(event~ I(time>4&time<9)+ I(time>8&time<12)+ I(time>12) +pclustname+sex, data=sha, family=binomial))
+
+#the variables coded pclustname[Type k] in the output reflect the prior histories
+#the coefficients can be interpreted as those from a discrete time event history analysis, conditioned on the sequence history prior to the event
