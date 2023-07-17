@@ -2,7 +2,7 @@
 Code Snippets used in the Quality &amp; Quantity article, "History Matters..."
 
 NOTE: The SHP data that we used for this paper is not public. 
-We are working on providing code based on public data - an SHP extract called biofam.
+We are providing code based on public data - an SHP extract called biofam.
 Biofam is based on the SHP, so the basic structure is the same. By choosing the 
 LEFT+MARR+CHILD state as the terminal outcome, we can reconstruct all of the 
 concepts of the paper with publicly available data.
