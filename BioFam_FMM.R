@@ -52,10 +52,12 @@ if (loadRuns) load("FMMruns.Rdata")
 Krange <- 2:4  #SLOW!!!
 nRep <- 5 #number of random starts (slow, but important)
 
-#this type of coding was used in the paper
+#this type of coding was used in the paper 
 bioLong$ageGE18 <- bioLong$t>4
 bioLong$ageGE22 <- bioLong$t>8
 bioLong$ageGE26 <- bioLong$t>12
+
+ages <- sort(unique(bioLong$t))+13 #age 14 is youngest
 
 ## Call to flexmix:
 ### setup for grouping: formula=.~0|id
@@ -92,14 +94,26 @@ rsltList <- fmm1@models[[bestBIC]]@components
 # We break this down
 ## DRIFT MODELS:
 ## These multinomial logit parameters describe the relative odds of each token (with 1 as the reference) changing linearly over time. Combined and transformed, they produce non-linear probability curves in a competing risks sense, as per the JRSS-A discussion (and figures) of FMM in Scott et al. (2020)
-lapply(fmm1@models[[bestBIC]]@components,"[[",1)
-
+rel.odds <- lapply(fmm1@models[[bestBIC]]@components,"[[",1)
+rel.odds
+#plot associated with them:
+x.pts <- sort(unique(bioLong$t)) #code uses t for prediction
+x.pred.mat <- cbind(1,x.pts) 
+par(mfrow=c(2,2)) # for 4 classes
+for (i in seq_along(rel.odds)) {
+  plot(ages,rep(0,length(ages)),type='n',ylab='Prob. (competing)',
+        ylim=c(0,1),axes=F,main=paste0("Class ",i))
+  axis(1,at=ages) #looks better to use ages
+  axis(2,at=seq(0,1,length=11))
+  prob.curves <- rel.odds[[i]]@predict(x.pred.mat)
+  matlines(ages,prob.curves,type='l',lwd=3)
+}
 ## HAZARD MODEL:
 #For each component (cluster), we fit a model for logit(P(exit)) given covariates and latent class
 ##Example 1: the model specification constrains all AGE effects to be homogenous across classes (the `fixed` parameter in the flexmix call), while the sex effect varies (the main or default formula of the second channel)
 ##NOTE: period effects are additive due to the use of ">=" (GE)
-lapply(fmm1@models[[bestBIC]]@components,"[[",2)
-
+rel.hzd <- lapply(fmm1@models[[bestBIC]]@components,"[[",2)
+rel.hzd
 
 ## EXAMPLE 2
 
