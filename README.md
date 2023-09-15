@@ -20,4 +20,9 @@ BioFam_FMM.R - Finite Mixture Models (FMM) - or latent class models - for 2-chan
                one a Discrete Time Event History Analysis (DT-EHA) as described in the paper
 FMMRuns.Rdata- Saved runs for the FMM, which can take a longer time to run.
 
+Note: the results of the FMM can be visualized via 2 sets of 4 plots each (4 latent class solution). 
+For the second model (fmm2), Class 2 is of interest, as it yields children who marry but do not leave home.
+This is indicated throught the competing risks that describe the cohabitation status (essentially only two states
+are possible) and the DTEHA plot, which shows low hazard of leaving home, as compared to other classes.
+
 Questions? Contact marc.scott@nyu.edu (corresponding author)
