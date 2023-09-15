@@ -114,6 +114,27 @@ for (i in seq_along(rel.odds)) {
 ##NOTE: period effects are additive due to the use of ">=" (GE)
 rel.hzd <- lapply(fmm1@models[[bestBIC]]@components,"[[",2)
 rel.hzd
+#build design matrix (from data)
+desMat <- unique(bioLong[,c("t","ageGE18","ageGE22","ageGE26","sex")]) %>% 
+  arrange(sex,t) %>% 
+  mutate(ageGE18TRUE=ifelse(ageGE18,1,0),ageGE22TRUE=ifelse(ageGE22,1,0),
+         ageGE26TRUE=ifelse(ageGE26,1,0), `(Intercept)`=1) %>%
+  select(-t,-ageGE18,-ageGE22,-ageGE26) %>%
+  relocate(sex,.after = last_col()) %>% 
+  as.matrix()
+
+par(mfrow=c(2,2)) # for 4 classes
+for (i in seq_along(rel.hzd)) {
+  plot(ages,rep(0,length(ages)),type='n',ylab='Hazard (Prob.)',
+       ylim=c(0,0.125),axes=F,main=paste0("Class ",i))
+  axis(1,at=ages) #looks better to use ages
+  axis(2)
+  hzd.preds <- rel.hzd[[i]]@predict(desMat)
+  hzd.curves <- do.call(cbind,split(hzd.preds,desMat[,"sex"])) #split by sex - make 2 cols
+  matlines(ages,hzd.curves,type='l',lwd=3)
+  legend("topleft",col=1:2,lty=1:2,lwd=2,c('sex=0','sex=1'))
+}
+
 
 ## EXAMPLE 2
 
@@ -150,12 +171,46 @@ rsltList <- fmm2@models[[bestBIC]]@components
 
 # We break this down
 ## DRIFT MODELS:
-lapply(fmm2@models[[bestBIC]]@components,"[[",1)
+## These multinomial logit parameters describe the relative odds of each token (with 1 as the reference) changing linearly over time. Combined and transformed, they produce non-linear probability curves in a competing risks sense, as per the JRSS-A discussion (and figures) of FMM in Scott et al. (2020)
+rel.odds <- lapply(fmm2@models[[bestBIC]]@components,"[[",1)
+rel.odds
+#plot associated with them:
+x.pts <- sort(unique(bioLong$t)) #code uses t for prediction
+x.pred.mat <- cbind(1,x.pts) 
+par(mfrow=c(2,2)) # for 4 classes
+for (i in seq_along(rel.odds)) {
+  plot(ages,rep(0,length(ages)),type='n',ylab='Prob. (competing)',
+       ylim=c(0,1),axes=F,main=paste0("Class ",i))
+  axis(1,at=ages) #looks better to use ages
+  axis(2,at=seq(0,1,length=11))
+  prob.curves <- rel.odds[[i]]@predict(x.pred.mat)
+  matlines(ages,prob.curves,type='l',lwd=3)
+}
+
 
 ## HAZARD MODEL:
 ##Example 2: the model specification constrains all sex and log(time) effects to be homogenous across classes (the `fixed` parameter in the flexmix call), while age indicators vary, allowing a general time effect punctuated by larger, class-specific period effects.
 ##NOTE: period effects are additive due to the use of ">=" (GE)
 ##CAUTION: the constant is supressed in this formulation, creating a slightly different set of period effects
+rel.hzd <- lapply(fmm2@models[[bestBIC]]@components,"[[",2)
+rel.hzd
+#build design matrix (from data)
+desMat <- unique(bioLong[,c("t","ageGE18","ageGE22","ageGE26","sex")]) %>% 
+  arrange(sex,t) %>% 
+  mutate(ageGE18FALSE=ifelse(ageGE18,0,1),ageGE18TRUE=ifelse(ageGE18,1,0),ageGE22TRUE=ifelse(ageGE22,1,0),
+         ageGE26TRUE=ifelse(ageGE26,1,0), `log(t)`=log(t)) %>%
+  select(-t,-ageGE18,-ageGE22,-ageGE26) %>%
+  relocate(`log(t)`,.after = sex) %>% 
+  as.matrix()
 
-lapply(fmm2@models[[bestBIC]]@components,"[[",2)
-
+par(mfrow=c(2,2)) # for 4 classes
+for (i in seq_along(rel.hzd)) {
+  plot(ages,rep(0,length(ages)),type='n',ylab='Hazard (Prob.)',
+       ylim=c(0,0.125),axes=F,main=paste0("Class ",i))
+  axis(1,at=ages) #looks better to use ages
+  axis(2)
+  hzd.preds <- rel.hzd[[i]]@predict(desMat)
+  hzd.curves <- do.call(cbind,split(hzd.preds,desMat[,"sex"])) #split by sex - make 2 cols
+  matlines(ages,hzd.curves,type='l',lwd=3)
+  legend("topleft",col=1:2,lty=1:2,lwd=2,c('sex=0','sex=1'))
+}
