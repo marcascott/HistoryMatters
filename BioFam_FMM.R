@@ -75,6 +75,16 @@ bestBIC <- as.numeric(which.min(BIC(fmm1)))
 ## mixing parameters are displayed with this call:
 summary(fmm1@models[[bestBIC]])
 
+# Observation class membership:
+# 1. identify record-specific probability of class membership 
+# 2. take the MAP
+# 3. reduce to id-specific (corresponds to wide format)
+# 4. summarize
+probClass.1 <- fmm1@models[[bestBIC]]@posterior$scaled
+MAP.1 <- apply(probClass.1,1,which.max)
+class.id.lvl.1 <- tapply(MAP.1,bioLong$id,"[[",1) #take first; they are all the same
+class.id.lvl.1 <- tapply(MAP.1,bioLong$id,mean) #take mean; they are all the same, and if there's a bug, you might catch it this way
+table(class.id.lvl.1)
 
 ##results are given in a list, one element for each component of the mixture:
 rsltList <- fmm1@models[[bestBIC]]@components
@@ -109,6 +119,17 @@ fmm2
 bestBIC <- as.numeric(which.min(BIC(fmm2)))
 ## mixing parameters are displayed with this call:
 summary(fmm2@models[[bestBIC]])
+
+# Observation class membership:
+# 1. identify record-specific probability of class membership 
+# 2. take the MAP
+# 3. reduce to id-specific (corresponds to wide format)
+# 4. summarize
+probClass.2 <- fmm2@models[[bestBIC]]@posterior$scaled
+MAP.2 <- apply(probClass.2,1,which.max)
+class.id.lvl.2 <- tapply(MAP.2,bioLong$id,"[[",1) #take first; they are all the same
+class.id.lvl.2 <- tapply(MAP.2,bioLong$id,mean) #take mean; they are all the same, and if there's a bug, you might catch it this way
+table(class.id.lvl.2)
 
 ##results are given in a list, one element for each component of the mixture:
 rsltList <- fmm2@models[[bestBIC]]@components
