@@ -39,6 +39,9 @@ bioLong <- reshape(biofam,varying=10:25,sep="a",v.names="tok",timevar="t",direct
     mutate(sex=ifelse(sex=="woman",1,0)) %>%
     select(-last)
 
+#remove state 6 from this version by shifting state 7 'down'
+bioLong <- bioLong %>% mutate(tok=ifelse(tok==7,6,tok))
+
 #FlexMix can take some time to run.
 
 ## We saved two files for you, to save a little time
@@ -106,7 +109,7 @@ for (i in seq_along(rel.odds)) {
   axis(1,at=ages) #looks better to use ages
   axis(2,at=seq(0,1,length=11))
   prob.curves <- rel.odds[[i]]@predict(x.pred.mat)
-  matlines(ages,prob.curves,type='l',lwd=3)
+  matlines(ages,prob.curves,type='l',lwd=3,col=2:8)
 }
 ## HAZARD MODEL:
 #For each component (cluster), we fit a model for logit(P(exit)) given covariates and latent class
@@ -131,8 +134,8 @@ for (i in seq_along(rel.hzd)) {
   axis(2)
   hzd.preds <- rel.hzd[[i]]@predict(desMat)
   hzd.curves <- do.call(cbind,split(hzd.preds,desMat[,"sex"])) #split by sex - make 2 cols
-  matlines(ages,hzd.curves,type='l',lwd=3)
-  legend("topleft",col=1:2,lty=1:2,lwd=2,c('sex=0','sex=1'))
+  matlines(ages,hzd.curves,type='l',lwd=3,col=2:3)
+  legend("topleft",col=2:3,lty=1:2,lwd=2,c('sex=0','sex=1'))
 }
 
 
@@ -184,7 +187,7 @@ for (i in seq_along(rel.odds)) {
   axis(1,at=ages) #looks better to use ages
   axis(2,at=seq(0,1,length=11))
   prob.curves <- rel.odds[[i]]@predict(x.pred.mat)
-  matlines(ages,prob.curves,type='l',lwd=3)
+  matlines(ages,prob.curves,type='l',lwd=3,col=2:8)
 }
 
 
@@ -211,6 +214,6 @@ for (i in seq_along(rel.hzd)) {
   axis(2)
   hzd.preds <- rel.hzd[[i]]@predict(desMat)
   hzd.curves <- do.call(cbind,split(hzd.preds,desMat[,"sex"])) #split by sex - make 2 cols
-  matlines(ages,hzd.curves,type='l',lwd=3)
-  legend("topleft",col=1:2,lty=1:2,lwd=2,c('sex=0','sex=1'))
+  matlines(ages,hzd.curves,type='l',lwd=3,col=2:3)
+  legend("topleft",col=2:3,lty=1:2,lwd=2,c('sex=0','sex=1'))
 }
